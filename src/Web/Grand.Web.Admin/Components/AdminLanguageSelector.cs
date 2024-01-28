@@ -1,0 +1,37 @@
+﻿using Grand.Infrastructure;
+using Grand.Web.Common.Components;
+using Grand.Business.Core.Interfaces.Common.Localization;
+using Grand.Web.Admin.Extensions.Mapping;
+using Grand.Web.Admin.Models.Common;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Grand.Web.Admin.Components
+{
+    public class AdminLanguageSelectorViewComponent : BaseAdminViewComponent
+    {
+        private readonly IWorkContext _workContext;
+        private readonly ILanguageService _languageService;
+
+        public AdminLanguageSelectorViewComponent(
+            IWorkContext workContext,
+            ILanguageService languageService)
+        {
+            _workContext = workContext;
+            _languageService = languageService;
+        }
+
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            var model = new LanguageSelectorModel {
+                CurrentLanguage = _workContext.WorkingLanguage.ToModel(),
+                AvailableLanguages = (await _languageService
+                        .GetAllLanguages(
+                            showHidden: true,
+                            storeId: _workContext.CurrentStore.Id))
+                    .Select(x => x.ToModel())
+                    .ToList()
+            };
+            return View(model);
+        }
+    }
+}
